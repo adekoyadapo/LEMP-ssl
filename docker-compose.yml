@@ -1,0 +1,49 @@
+version: '3'
+services:
+
+  web:
+      build:
+        context: .
+        dockerfile: ./containers/nginx/Dockerfile
+      container_name: websvr_nginx
+      volumes:
+        - ./data/certbot/conf:/etc/letsencrypt
+      restart: always
+      ports:
+          - "80:80"
+          - "443:443"
+      depends_on:
+          - php
+      networks:
+        - docker-lemp
+
+  php:
+      build:
+        context: .
+        dockerfile: ./containers/php/Dockerfile
+      container_name: php_fpm
+      restart: always
+      depends_on:
+          - mysql
+      networks:
+        - docker-lemp
+
+  mysql:
+      build:
+        context: .
+        dockerfile: ./containers/mysql/Dockerfile
+      container_name: database
+      restart: always
+      environment:
+         MYSQL_ROOT_PASSWORD: pass
+      volumes:
+      - db:/var/lib/mysql
+      networks:
+        - docker-lemp
+
+networks:
+    docker-lemp:
+        driver: bridge
+
+volumes:
+  db:
